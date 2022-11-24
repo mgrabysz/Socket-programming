@@ -8,12 +8,13 @@
 
 int main(int argc, char *argv[]) {
 
-    // read port from argument
-    if (argc != 2) {
-        printf("expected port argument");
+    // read address and port from argument
+    if (argc != 3) {
+        printf("expected address and port arguments");
         return 1;
     }
-    int port = (int) strtol(argv[1], NULL, 0);
+    int address_arg = inet_addr(argv[1]);
+    int port_arg = (int) strtol(argv[2], NULL, 0);
 
     // create needed structures
     char buf[BUF_SIZE];
@@ -24,8 +25,8 @@ int main(int argc, char *argv[]) {
     };
     struct sockaddr_in server_address = {
             .sin_family = AF_INET,
-            .sin_addr.s_addr = inet_addr("127.0.0.1"),
-            .sin_port = htons(port)
+            .sin_addr.s_addr = address_arg,
+            .sin_port = htons(port_arg)
     };
 
     // create socket

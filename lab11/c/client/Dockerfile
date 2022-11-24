@@ -1,4 +1,4 @@
 FROM gcc:4.9
 ADD main.c /
-RUN gcc -o main main.c
-ENTRYPOINT ["./main"]
+RUN gcc -std=c11 -o main.out main.c
+ENTRYPOINT ["./main.out"]
