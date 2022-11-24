@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 
 #define BUF_SIZE 64
+#define PORT 8080
 
 int main() {
     char buf[BUF_SIZE];
@@ -11,10 +12,10 @@ int main() {
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(8080);
+    server_address.sin_port = htons(PORT);
 
-    struct sockaddr_in client_adress;
-    socklen_t client_address_len = sizeof(client_adress);
+    struct sockaddr_in client_address;
+    socklen_t client_address_len = sizeof(client_address);
 
     // create socket
     int socket_fd = socket(
@@ -40,16 +41,19 @@ int main() {
 
     // listen for datagrams
     while (1) {
+        printf("Listening...\n");
         int bytes_received = (int) recvfrom(
                 socket_fd, buf, sizeof(buf), 0,
-                (struct sockaddr *) &client_adress, &client_address_len
+                (struct sockaddr *) &client_address, &client_address_len
         );
         if (bytes_received < 0) {
             perror("error receiving data");
             return 1;
         }
-        printf("Received %d bytes from %s:\n%.*s\n\n",
-               bytes_received, inet_ntoa(client_adress.sin_addr), bytes_received, buf
+
+        printf(
+                "Received %d bytes from %s:\n%.*s\n\n",
+                bytes_received, inet_ntoa(client_address.sin_addr), bytes_received, buf
         );
     }
 
