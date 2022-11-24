@@ -2,22 +2,31 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdlib.h>
 
 #define BUF_SIZE 64
 
-int main() {
+int main(int argc, char *argv[]) {
 
-    char buf[BUF_SIZE] = "Hello!";
+    // read port from argument
+    if (argc != 2) {
+        printf("expected port argument");
+        return 1;
+    }
+    int port = (int) strtol(argv[1], NULL, 0);
 
-    struct sockaddr_in client_address;
-    client_address.sin_family = AF_INET;
-    client_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    client_address.sin_port = htons(0);
-
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    server_address.sin_port = htons(8080);
+    // create needed structures
+    char buf[BUF_SIZE];
+    struct sockaddr_in client_address = {
+            .sin_family = AF_INET,
+            .sin_addr.s_addr = htonl(INADDR_ANY),
+            .sin_port = htons(0)
+    };
+    struct sockaddr_in server_address = {
+            .sin_family = AF_INET,
+            .sin_addr.s_addr = inet_addr("127.0.0.1"),
+            .sin_port = htons(port)
+    };
 
     // create socket
     int socket_fd = socket(AF_INET, SOCK_DGRAM, 0);
@@ -26,7 +35,7 @@ int main() {
         return 1;
     }
 
-    // bind to local address
+    // bind socket to local address
     int bind_result = bind(socket_fd, (const struct sockaddr *) &client_address, sizeof(client_address));
     if (bind_result < 0) {
         perror("error binding socket");
