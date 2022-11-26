@@ -39,7 +39,7 @@ if __name__ == "__main__":
         try:
             message_to_print = message.decode("utf-8")
         except UnicodeDecodeError:
-            message_to_print = message
+            print(type(message))
 
         print(f'Client IP Address: {address}')
         print(f'Client message: {message_to_print}')
