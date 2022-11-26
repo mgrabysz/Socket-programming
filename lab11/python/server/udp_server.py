@@ -3,7 +3,7 @@ import argparse
 
 
 BUF_SIZE = 64
-HOST_IP = '127.0.0.1'
+HOST_IP = ''
 
 
 def create_parser():
