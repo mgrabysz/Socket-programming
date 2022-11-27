@@ -3,6 +3,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define BUF_SIZE 64
 
@@ -43,7 +44,32 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    // create example struct
+    struct example_struct {
+        long int a;
+        short int b;
+        char c[10];
+    };
+    struct example_struct stc = {75456, 31456, "abcdeABCDE"};
+    stc.c[10] = 0;
+
+    printf("sending struct {a=%ld, b=%d, c=%s}\n", stc.a, stc.b, stc.c);
+    printf("size of struct is %ld bytes\n\n", sizeof(stc));
+
+    // copy data to buffer
+    memcpy(buf, &stc, sizeof(stc));
+
     // send data
+    int bytes_sent = (int) sendto(
+            socket_fd, buf, sizeof(buf), 0,
+            (const struct sockaddr *) &server_address, sizeof(server_address)
+    );
+    if (bytes_sent < 0) {
+            perror("error sending data");
+            return 1;
+        }
+
+    printf("sent %d bytes to server\n", bytes_sent);
 
     return 0;
 }
