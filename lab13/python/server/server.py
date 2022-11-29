@@ -48,6 +48,7 @@ if __name__ == "__main__":
 
         try:
             stc.a, stc.b, stc.c = struct.unpack(struct_format, message[:20])
+            stc.c = stc.c.decode('ascii')
         except UnicodeDecodeError:
             print(type(message))
 
