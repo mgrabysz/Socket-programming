@@ -10,12 +10,14 @@
 int main(int argc, char *argv[]) {
 
     // read address and port from argument
-    if (argc != 3) {
-        printf("expected address and port arguments");
+    if (argc != 6) {
+        printf("expected address, port arguments and struct variables (long, short, char[10])\n");
         return 1;
     }
     int address_arg = inet_addr(argv[1]);
     int port_arg = (int) strtol(argv[2], NULL, 0);
+    long int a_arg = (long int) strtol(argv[3], NULL, 0);
+    short int b_arg = (short int) atoi(argv[4]);
 
     // create needed structures
     char buf[BUF_SIZE];
@@ -50,7 +52,8 @@ int main(int argc, char *argv[]) {
         short int b;
         char c[10];
     };
-    struct example_struct stc = {75456, 31456, "abcdeABCDE"};
+    struct example_struct stc = {a_arg, b_arg, *argv[5]};
+    strcpy(stc.c, argv[5]);
     stc.c[10] = 0;
 
     printf("sending struct {a=%ld, b=%d, c=%s}\n", stc.a, stc.b, stc.c);
