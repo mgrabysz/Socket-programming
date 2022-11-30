@@ -2,7 +2,7 @@ import socket
 import argparse
 
 
-BUF_SIZE = 64
+BUF_SIZE = 1
 HOST_IP = ''
 
 

@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 
-#define BUF_SIZE 64
+#define BUF_SIZE 1
 
 int main(int argc, char *argv[]) {
 
@@ -44,12 +44,8 @@ int main(int argc, char *argv[]) {
     }
 
     // send data
-    for (int countdown = 10; countdown >= 0; countdown--) {
-        if (countdown == 0) {
-            sprintf(buf, "boom!");
-        } else {
-            sprintf(buf, "%d", countdown);
-        }
+    for (int countdown = 9; countdown >= 0; countdown--) {
+        buf[0] = '0' + countdown;
 
         int bytes_sent = (int) sendto(
                 socket_fd, buf, sizeof(buf), 0,

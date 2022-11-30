@@ -4,7 +4,7 @@
 #include <arpa/inet.h>
 #include <stdlib.h>
 
-#define BUF_SIZE 64
+#define BUF_SIZE 1
 
 int main(int argc, char *argv[]) {
 
