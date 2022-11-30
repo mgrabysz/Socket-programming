@@ -4,7 +4,8 @@ import struct
 
 BUF_SIZE = 64
 HOST_IP = ''
-
+STRUCT_FORMAT = "@lh10s"
+STRUCT_LEN = 20
 
 def create_parser():
     parser = argparse.ArgumentParser()
@@ -33,8 +34,6 @@ if __name__ == "__main__":
             self.b: (int)
             self.c: (str)
     stc = Struct()
-    # format of struct - types of variables
-    struct_format = "@lh10s"
 
     while(True):
 
@@ -47,7 +46,7 @@ if __name__ == "__main__":
             break
 
         try:
-            stc.a, stc.b, stc.c = struct.unpack(struct_format, message[:20])
+            stc.a, stc.b, stc.c = struct.unpack(STRUCT_FORMAT, message[:STRUCT_LEN])
             stc.c = stc.c.decode('ascii')
         except UnicodeDecodeError:
             print(type(message))
