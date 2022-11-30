@@ -1,1 +1,1 @@
-docker run -it --init --rm --network-alias z46_lab13_python_server --network z46_network --name z46_lab13_python_server z46_lab13_python_server $1
+docker run -it --init --rm --network-alias z46_lab13_python_server --network z46_network --name z46_lab13_python_server z46_lab13_python_server "$@"
