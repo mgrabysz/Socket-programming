@@ -22,9 +22,8 @@ if __name__ == "__main__":
     udp_client_socket = socket.socket(
         family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-    for countdown in reversed(range(11)):
-        msg = "BOOM!" if countdown == 0 else str(countdown)
-        msg_bytes = str.encode(msg)
-        bytes_send = udp_client_socket.sendto(msg_bytes, server_address_port)
+    for countdown in reversed(range(10)):
+        msg_bytes = str(countdown).encode()
+        bytes_sent = udp_client_socket.sendto(msg_bytes, server_address_port)
 
-        print(f'Bytes send: {bytes_send}')
+        print(f'Bytes sent: {bytes_sent}')
