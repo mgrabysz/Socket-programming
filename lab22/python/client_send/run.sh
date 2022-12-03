@@ -1,1 +1,1 @@
-docker run -it --init --rm --network-alias z46_lab22_python_client --network z46_network --name z46_lab22_python_client z46_lab22_python_client "$@"
+docker run -it --init --rm --network-alias z46_lab22_python_client_send --network z46_network --name z46_lab22_python_client_send z46_lab22_python_client_send "$@"
