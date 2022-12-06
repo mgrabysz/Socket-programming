@@ -34,4 +34,4 @@ if __name__ == "__main__":
                     message = conn.recv(BUF_SIZE)
                     if not message:
                         break
-                    print(f'Client message: {int.from_bytes(message, "big")}')
+                    print(f'Client message: {message.decode("utf-8")}')
