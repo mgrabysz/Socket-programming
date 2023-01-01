@@ -1,6 +1,7 @@
 import argparse
 import json
 import socket
+from threading import Thread
 
 import registration
 import transmission
@@ -20,6 +21,8 @@ def main():
     udp_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     udp_server_socket.bind(server_address_port)
     print(f'Gateway listening on port {args.port}')
+
+    Thread(target=transmission.transmit, args=([8050, 8051], 5))
 
     while True:
         message_bytes = udp_server_socket.recv(65536)
