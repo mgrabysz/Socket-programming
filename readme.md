@@ -15,3 +15,12 @@ Moduł można wywołać z opcjonalnymi argumentami
 usage: client.py [-h] [-a ADDRESS] [-p PORT] [-d DEVICES] [-m MESSAGES] [-i INTERVAL]
 ```
 Można też bez; wtedy program uruchomi się z argumentami domyślnymi
+
+### Brama komunikacyjna
+Podstawowy moduł projektu, odpowiada za agregację i przesyłąnie danych od Kliantów do Serwerów. Pracuje na dwóch wątkach, jeden odbiera wiadomości drugi w określonych interwałach czasowych wysyła dane. Moduł `gateway.py` obsługuje funkcjonalność odbierania danych, w osobnych plikach `registration.py` oraz `transmission.py` obsługujemy odpowiednio prośby zarejestrowania i wyrejestrowania klientów, oraz otrzymane dane.
+
+Moduł można uruchomić ze zdefiniowanymi parametrami lub bez nich. 
+```shell
+gateway.py [-a ADDRESS] [-p PORT] [-i INTERVAL]
+```
+Domyśle wartości są kompatybilne z domyślnymi wartościami klientów i serwerów.
