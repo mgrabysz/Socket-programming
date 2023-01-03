@@ -1,25 +1,22 @@
 services:
-  server1:
+  server1: &server
     build: server
     tty: true
     command: -p 8082
   server2:
-    build: server
-    tty: true
+    <<: *server
     command: -p 8081
   gateway:
     build: gateway
     tty: true
     command: -p 8000 # -s server1:8082 -s server2:8081
-  client1:
+  client1: &client
     build: client
     tty: true
+    depends_on:
+      - gateway
     command: -a gateway -p 8000 -d 1 -m 60 -i 1
   client2:
-    build: client
-    tty: true
-    command: -a gateway -p 8000 -d 1 -m 60 -i 1
+    <<: *client
   client3:
-    build: client
-    tty: true
-    command: -a gateway -p 8000 -d 1 -m 60 -i 1
+    <<: *client
