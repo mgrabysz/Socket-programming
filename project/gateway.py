@@ -6,10 +6,17 @@ from threading import Thread
 import registration
 import transmission
 
+SERVER_IP = ''
+GATEWAY_PORT = 2137
+SERVER_PORTS = [2140, 2141]
+INTERVAL = 3
+
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("port")
+    parser.add_argument("-p", "--port", default=GATEWAY_PORT, help="port of the server")
+    parser.add_argument("-a", "--address", default=SERVER_IP, help="ip address of the server")
+    parser.add_argument("-i", "--interval", default=INTERVAL, help="interval between messages in seconds")
     return parser
 
 
@@ -17,12 +24,13 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    server_address_port = ('', int(args.port))
+    server_address_port = (args.address, int(args.port))
     udp_server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     udp_server_socket.bind(server_address_port)
     print(f'Gateway listening on port {args.port}')
 
-    Thread(target=transmission.transmit, args=([8050, 8051], 5))
+    thread = Thread(target=transmission.transmit, args=(args.address, SERVER_PORTS, int(args.interval)))
+    thread.start()
 
     while True:
         message_bytes = udp_server_socket.recv(65536)

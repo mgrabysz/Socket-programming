@@ -1,7 +1,7 @@
 import time
 import socket
 import json
-
+from typing import List, Any
 import registration
 
 __registered_devices = set()
@@ -27,7 +27,7 @@ def __get_package() -> dict:
     return __package
 
 
-def __add_payload_to_package(device_id: int, payload):
+def __add_payload_to_package(device_id: int, payload: Any):
     global __package
     __package["devices"][device_id] = payload
 
@@ -35,27 +35,35 @@ def __add_payload_to_package(device_id: int, payload):
 def handle_message(message: dict):
     print(f"handling transmission message: {message}")
 
-    if "device_id" not in message or "timestamp" not in message or "payload" not in message:
+    if (
+        "device_id" not in message
+        or "timestamp" not in message
+        or "payload" not in message
+    ):
         print("Incomplete transmmition")
         return
 
     if message["device_id"] not in __registered_devices:
         print(f"Invalid device id, device is not registered")
+        print(__registered_devices)
         return
 
     __add_payload_to_package(message["device_id"], message["payload"])
 
 
-def transmit(ports, interval):
+def transmit(address: str, ports: List[int], interval: float):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     while True:
-        msg_bytes = json.dumps(__get_package()).encode()
+        msg_to_send = __get_package()
+        msg_bytes = json.dumps(msg_to_send).encode()
+        print(f"Message send to servers:\n{msg_to_send}")
         __update_registered_devices()
         __reset_package()
 
         for port in ports:
-            bytes_sent = udp_client_socket.sendto(msg_bytes, port)
-            print(f"Bytes send: {bytes_sent}, to server running on port: {port}")
+            server_address_port = (address, int(port))
+            bytes_sent = udp_client_socket.sendto(msg_bytes, server_address_port)
+            print(f"{bytes_sent} bytes send to server running on port: {port}")
 
         time.sleep(interval)
