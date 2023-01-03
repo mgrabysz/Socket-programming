@@ -58,7 +58,7 @@ class Client:
 
 
 class Client_manager():
-    def __init__(self, client_socket, server_ip, server_port, num_of_devices, num_of_messages, interval):
+    def __init__(self, client_socket, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id):
         self.num_of_devices = num_of_devices
         self.interval = interval
         self.num_of_messages = num_of_messages
@@ -67,12 +67,14 @@ class Client_manager():
         self.client_socket = client_socket
         self.lock = Lock()
         self.threads = []
+        self.first_id = first_id
 
     def run_devices(self):
 
         for i in range(self.num_of_devices):
             self.threads.append(Thread(target=multi_threaded_client, args=(
-                i, self.server_ip, self.server_port, self.num_of_messages, self.interval, self.client_socket, self.lock
+                self.first_id + i, self.server_ip, self.server_port,
+                self.num_of_messages, self.interval, self.client_socket, self.lock
             )))
 
         for thread in self.threads:
@@ -89,6 +91,7 @@ def create_parser():
     parser.add_argument("-d", "--devices", default=NUM_OF_DEVICES, help="number of devices (threads) to be launched")
     parser.add_argument("-m", "--messages", default=NUM_OF_MESSAGES, help="number of messages to be sent from device")
     parser.add_argument("-i", "--interval", default=INTERVAL, help="interval between messages in seconds")
+    parser.add_argument("--id", default=0, help="id of the first device created")
     return parser
 
 
@@ -109,6 +112,7 @@ if __name__ == "__main__":
         server_port=int(args.port),
         num_of_devices=int(args.devices),
         num_of_messages=int(args.messages),
-        interval=int(args.interval)
+        interval=int(args.interval),
+        first_id=int(args.id)
     )
     client_manager.run_devices()
