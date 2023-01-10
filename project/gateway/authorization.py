@@ -1,17 +1,25 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
 
 # defaults
 PATH_TO_KEY = "./key.pem"
-PASSWORD = b"Qwerty123"
+PASSWORD = "Qwerty123"
 
 
 class AuthorizationCenter:
-    def __init__(self, path=PATH_TO_KEY, password=PASSWORD):
-        self.path = path
+    def __init__(self, path=None, password=PASSWORD):
+        self.password = password.encode('utf-8')
         self.key = None
-        self.password = password
+        if path:
+            self.path = path
+            self.load_key()
+        else:
+            self.path = PATH_TO_KEY
+            self.generate_key()
 
     def generate_key(self):
         self.key = rsa.generate_private_key(
@@ -34,3 +42,15 @@ class AuthorizationCenter:
                 password=self.password,
                 backend=default_backend()
             )
+
+    def signature(self, message):
+        bytes_msg = message.encode('utf-8')
+        signature = self.key.sign(
+            bytes_msg,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return signature
