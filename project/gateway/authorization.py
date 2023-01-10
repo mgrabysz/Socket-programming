@@ -1,9 +1,8 @@
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
-
+from cryptography.hazmat.primitives.asymmetric import rsa
 
 # defaults
 PATH_TO_KEY = "./key.pem"
@@ -44,9 +43,8 @@ class AuthorizationCenter:
             )
 
     def signature(self, message):
-        bytes_msg = message.encode('utf-8')
         signature = self.key.sign(
-            bytes_msg,
+            message,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),
                 salt_length=padding.PSS.MAX_LENGTH

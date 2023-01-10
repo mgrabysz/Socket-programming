@@ -5,6 +5,7 @@ from threading import Thread
 
 import registration
 import transmission
+import authorization
 
 SERVER_IP = ''
 GATEWAY_PORT = 2137
@@ -17,6 +18,8 @@ def create_parser():
     parser.add_argument("-p", "--port", default=GATEWAY_PORT, help="port of the server")
     parser.add_argument("-a", "--address", default=SERVER_IP, help="ip address of the server")
     parser.add_argument("-i", "--interval", default=INTERVAL, help="interval between messages in seconds")
+    parser.add_argument("-k", "--key", help="path to the private key in .pem format")
+    parser.add_argument("-v", "--verbose", action="store_true")
     return parser
 
 
@@ -29,7 +32,10 @@ def main():
     udp_server_socket.bind(server_address_port)
     print(f'Gateway listening on port {args.port}')
 
-    thread = Thread(target=transmission.transmit, args=(args.address, SERVER_PORTS, int(args.interval)))
+    authorization_center = authorization.AuthorizationCenter(path=args.key)
+
+    thread = Thread(target=transmission.transmit,
+                    args=(args.address, SERVER_PORTS, int(args.interval), authorization_center, args.verbose))
     thread.start()
 
     while True:
