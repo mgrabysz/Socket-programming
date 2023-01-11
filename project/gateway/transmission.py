@@ -61,18 +61,20 @@ def transmit(address: str, ports: List[int], interval: float, ac: authorization.
         msg_to_send = __get_package()
         msg_bytes = json.dumps(msg_to_send).encode()
         signature = ac.signature(msg_bytes)
-        msg_to_send["signature"] = signature.decode('unicode_escape')
-        msg_bytes = json.dumps(msg_to_send, ensure_ascii=False).encode('utf-8')
-
-        if not verbose:
-            msg_to_send["signature"] = msg_to_send["signature"][0:10] + "..."
-        print(f"Message send to servers:\n{msg_to_send}")
+        print("Message send to servers:")
+        if verbose:
+            print(f"Signature: {signature}")
+        else:
+            print(f"Signature: {signature[0:10]}...")
+        print(f"Payload: {msg_to_send}")
         __update_registered_devices()
         __reset_package()
 
         for port in ports:
             server_address_port = (address, int(port))
+            bytes_sent_key = udp_client_socket.sendto(signature, server_address_port)
             bytes_sent = udp_client_socket.sendto(msg_bytes, server_address_port)
-            print(f"{bytes_sent} bytes send to server running on port: {port}")
+            print(f"{bytes_sent_key + bytes_sent} bytes send to server running on port: {port}")
 
+        print("")
         time.sleep(interval)
