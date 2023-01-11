@@ -72,9 +72,8 @@ def transmit(servers: list[tuple[str, int]], interval: float, ac: authorization.
         _reset_package()
 
         for server in servers:
-            bytes_sent_key = udp_client_socket.sendto(signature, server)
-            bytes_sent = udp_client_socket.sendto(msg_bytes, server)
-            print(f"{bytes_sent_key + bytes_sent} bytes send to server {server[0]}:{server[1]}")
+            bytes_sent = udp_client_socket.sendto(signature + msg_bytes, server)
+            print(f"{bytes_sent} bytes send to server {server[0]}:{server[1]}")
 
         print("")
         time.sleep(interval)
