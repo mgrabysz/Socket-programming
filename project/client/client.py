@@ -1,10 +1,10 @@
+import argparse
 import random
 import socket
 import time
-import argparse
 from threading import Lock, Thread
 
-from messages import Register_message, Transmission_message, Unregister_message
+from messages import RegisterMessage, TransmissionMessage, UnregisterMessage
 
 # defaults
 SERVER_IP = '127.0.0.1'
@@ -36,28 +36,28 @@ class Client:
         self.send_unregister_message()
 
     def send_register_message(self):
-        register_message = Register_message(self.device_id, time.time())
+        register_message = RegisterMessage(self.device_id, time.time())
         msg_bytes = register_message.to_json().encode()
         self.socket.sendto(msg_bytes, self.server_address)
         with self.lock:
             print(f'Sent register message from device {self.device_id}')
 
     def send_unregister_message(self):
-        unregister_message = Unregister_message(self.device_id)
+        unregister_message = UnregisterMessage(self.device_id)
         msg_bytes = unregister_message.to_json().encode()
         self.socket.sendto(msg_bytes, self.server_address)
         with self.lock:
             print(f'Sent unregister message from device {self.device_id}')
 
     def send_transmission_message(self, payload):
-        register_message = Transmission_message(self.device_id, time.time(), payload)
+        register_message = TransmissionMessage(self.device_id, time.time(), payload)
         msg_bytes = register_message.to_json().encode()
         self.socket.sendto(msg_bytes, self.server_address)
         with self.lock:
             print(f'Message sent: {payload} from device {self.device_id}')
 
 
-class Client_manager():
+class ClientManager:
     def __init__(self, client_socket, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id):
         self.num_of_devices = num_of_devices
         self.interval = interval
@@ -100,13 +100,13 @@ def multi_threaded_client(device_id, server_ip, server_port, num_of_messages, in
     client.transmit(num_of_messages, interval)
 
 
-if __name__ == "__main__":
+def main():
     parser = create_parser()
     args = parser.parse_args()
 
     client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
-    client_manager = Client_manager(
+    client_manager = ClientManager(
         client_socket=client_socket,
         server_ip=args.address,
         server_port=int(args.port),
@@ -116,3 +116,7 @@ if __name__ == "__main__":
         first_id=int(args.id)
     )
     client_manager.run_devices()
+
+
+if __name__ == "__main__":
+    main()

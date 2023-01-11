@@ -1,7 +1,7 @@
 import json
 
 
-class Register_message:
+class RegisterMessage:
     def __init__(self, device_id, timestamp):
         self.action = "register"
         self.device_id = device_id
@@ -11,7 +11,7 @@ class Register_message:
         return json.dumps(self.__dict__)
 
 
-class Unregister_message:
+class UnregisterMessage:
     def __init__(self, device_id):
         self.action = "unregister"
         self.device_id = device_id
@@ -20,7 +20,7 @@ class Unregister_message:
         return json.dumps(self.__dict__)
 
 
-class Transmission_message:
+class TransmissionMessage:
     def __init__(self, device_id, timestamp, payload):
         self.action = "transmit"
         self.device_id = device_id
