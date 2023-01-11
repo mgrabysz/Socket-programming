@@ -43,5 +43,5 @@ docker compose up [-d]
 ### Monitorowanie logów
 
 ```bash
-docker logs --follow [nazwy kontenerów]
+docker compose logs --follow [nazwy kontenerów]
 ```
