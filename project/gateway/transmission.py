@@ -1,9 +1,10 @@
-import time
-import socket
 import json
-from typing import List, Any
-import registration
+import socket
+import time
+from typing import Any
+
 import authorization
+import registration
 
 _registered_devices = set()
 _package = dict()
@@ -54,7 +55,7 @@ def handle_message(message: dict):
     _add_payload_to_package(message["device_id"], message["payload"])
 
 
-def transmit(address: str, ports: List[int], interval: float, ac: authorization.AuthorizationCenter, verbose: bool):
+def transmit(servers: list[tuple[str, int]], interval: float, ac: authorization.AuthorizationCenter, verbose: bool):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     while True:
@@ -70,11 +71,10 @@ def transmit(address: str, ports: List[int], interval: float, ac: authorization.
         _update_registered_devices()
         _reset_package()
 
-        for port in ports:
-            server_address_port = (address, int(port))
-            bytes_sent_key = udp_client_socket.sendto(signature, server_address_port)
-            bytes_sent = udp_client_socket.sendto(msg_bytes, server_address_port)
-            print(f"{bytes_sent_key + bytes_sent} bytes send to server running on port: {port}")
+        for server in servers:
+            bytes_sent_key = udp_client_socket.sendto(signature, server)
+            bytes_sent = udp_client_socket.sendto(msg_bytes, server)
+            print(f"{bytes_sent_key + bytes_sent} bytes send to server {server[0]}:{server[1]}")
 
         print("")
         time.sleep(interval)

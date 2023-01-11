@@ -5,7 +5,7 @@ from threading import Lock, Thread
 BUF_SIZE = 65536
 HOST_IP = ""
 PORTS = list(range(2140, 2142))
-NUM_OF_DEVICES = 2
+NUM_OF_DEVICES = 1
 
 
 class Server:
