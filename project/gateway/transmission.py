@@ -5,34 +5,34 @@ from typing import List, Any
 import registration
 import authorization
 
-__registered_devices = set()
-__package = dict()
+_registered_devices = set()
+_package = dict()
 
 
-def __update_registered_devices():
-    global __registered_devices
-    __registered_devices = registration.get_registered_devices()
+def _update_registered_devices():
+    global _registered_devices
+    _registered_devices = registration.get_registered_devices()
 
 
-def __reset_package():
-    global __package
-    __package = dict()
-    __package["devices"] = dict()
-    for device in __registered_devices:
-        __package["devices"][device] = None
+def _reset_package():
+    global _package
+    _package = dict()
+    _package["devices"] = dict()
+    for device in _registered_devices:
+        _package["devices"][device] = None
 
 
-def __get_package() -> dict:
-    global __package
-    if "devices" not in __package.keys():
-        __package["devices"] = dict()
-    __package["timestamp"] = time.time()
-    return __package
+def _get_package() -> dict:
+    global _package
+    if "devices" not in _package.keys():
+        _package["devices"] = dict()
+    _package["timestamp"] = time.time()
+    return _package
 
 
-def __add_payload_to_package(device_id: int, payload: Any):
-    global __package
-    __package["devices"][device_id] = payload
+def _add_payload_to_package(device_id: int, payload: Any):
+    global _package
+    _package["devices"][device_id] = payload
 
 
 def handle_message(message: dict):
@@ -46,19 +46,19 @@ def handle_message(message: dict):
         print("Incomplete transmission")
         return
 
-    if message["device_id"] not in __registered_devices:
+    if message["device_id"] not in _registered_devices:
         print(f"Invalid device id, device is not registered")
-        print(__registered_devices)
+        print(_registered_devices)
         return
 
-    __add_payload_to_package(message["device_id"], message["payload"])
+    _add_payload_to_package(message["device_id"], message["payload"])
 
 
 def transmit(address: str, ports: List[int], interval: float, ac: authorization.AuthorizationCenter, verbose: bool):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     while True:
-        msg_to_send = __get_package()
+        msg_to_send = _get_package()
         msg_bytes = json.dumps(msg_to_send).encode()
         signature = ac.signature(msg_bytes)
         print("Message send to servers:")
@@ -67,8 +67,8 @@ def transmit(address: str, ports: List[int], interval: float, ac: authorization.
         else:
             print(f"Signature: {signature[0:10]}...")
         print(f"Payload: {msg_to_send}")
-        __update_registered_devices()
-        __reset_package()
+        _update_registered_devices()
+        _reset_package()
 
         for port in ports:
             server_address_port = (address, int(port))
