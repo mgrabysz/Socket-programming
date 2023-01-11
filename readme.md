@@ -24,3 +24,21 @@ Moduł można uruchomić ze zdefiniowanymi parametrami lub bez nich.
 gateway.py [-a ADDRESS] [-p PORT] [-i INTERVAL]
 ```
 Domyśle wartości są kompatybilne z domyślnymi wartościami klientów i serwerów.
+
+### Budowanie kontenerów
+
+```bash
+docker compose build
+```
+
+### Uruchamianie przykładowej konfiguracji (3 urządzenia + brama + 2 serwery)
+
+```bash
+docker compose up [-d]
+```
+
+### Monitorowanie logów
+
+```bash
+docker logs --follow [nazwy kontenerów]
+```
