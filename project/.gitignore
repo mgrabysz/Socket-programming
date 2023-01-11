@@ -1,0 +1,5 @@
+**/.idea/
+**/.fleet/
+**/__pycache__/
+**/venv/
+gateway/key.pem
