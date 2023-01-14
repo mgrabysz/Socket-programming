@@ -20,7 +20,20 @@ def _reset_package():
     _package = dict()
     _package["devices"] = dict()
     for device in _registered_devices:
-        _package["devices"][device] = None
+        _package["devices"][device] = []
+
+
+def _check_registered_devices():
+    global _package
+    unused_devices = []
+    for device in _package["devices"].keys():
+        if len(_package["devices"][device]) == 0:
+            _package["devices"][device] = None
+            unused_devices.append(device)
+    if len(unused_devices) != 0:
+        print(
+            f"Registered devices that did not send any transmittion data: {unused_devices}"
+        )
 
 
 def _get_package() -> dict:
@@ -28,12 +41,15 @@ def _get_package() -> dict:
     if "devices" not in _package.keys():
         _package["devices"] = dict()
     _package["timestamp"] = time.time()
+    _check_registered_devices()
     return _package
 
 
 def _add_payload_to_package(device_id: int, payload: Any):
     global _package
-    _package["devices"][device_id] = payload
+    if device_id not in _package["devices"].keys():
+        _package["devices"][device_id] = []
+    _package["devices"][device_id].append(payload)
 
 
 def handle_message(message: dict):
@@ -48,14 +64,18 @@ def handle_message(message: dict):
         return
 
     if message["device_id"] not in _registered_devices:
-        print(f"Invalid device id, device is not registered")
-        print(_registered_devices)
+        print(f"Invalid device id={message['device_id']}, device is not registered!")
         return
 
     _add_payload_to_package(message["device_id"], message["payload"])
 
 
-def transmit(servers: list[tuple[str, int]], interval: float, ac: authorization.AuthorizationCenter, verbose: bool):
+def transmit(
+    servers: list[tuple[str, int]],
+    interval: float,
+    ac: authorization.AuthorizationCenter,
+    verbose: bool,
+):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     while True:
