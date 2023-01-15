@@ -1,49 +1,60 @@
+import os.path
+
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import rsa
 
-# defaults
-PATH_TO_KEY = "./key.pem"
-PASSWORD = "Qwerty123"
-
 
 class AuthenticationCenter:
-    def __init__(self, path=None, password=PASSWORD):
+    def __init__(self, private_key_path, public_key_path, password):
         self.password = password.encode('utf-8')
-        self.key = None
-        if path:
-            self.path = path
-            self.load_key()
-        else:
-            self.path = PATH_TO_KEY
-            self.generate_key()
+        self.private_key = None
 
-    def generate_key(self):
-        self.key = rsa.generate_private_key(
+        if os.path.exists(private_key_path):
+            self.load_private_key(private_key_path)
+        else:
+            self.generate_private_key(private_key_path)
+            self.generate_public_key(public_key_path)
+
+    def generate_private_key(self, path: str):
+        self.private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
             backend=default_backend()
         )
 
-        with open(self.path, "wb") as f:
-            f.write(self.key.private_bytes(
+        with open(path, "wb") as f:
+            f.write(self.private_key.private_bytes(
                 encoding=serialization.Encoding.PEM,
                 format=serialization.PrivateFormat.TraditionalOpenSSL,
                 encryption_algorithm=serialization.BestAvailableEncryption(b"Qwerty123")
             ))
 
-    def load_key(self):
-        with open(self.path, "rb") as f:
-            self.key = serialization.load_pem_private_key(
+        print(f"Generated new private key at {path}")
+
+    def generate_public_key(self, path: str):
+        pub_key = self.private_key.public_key()
+
+        with open(path, "wb") as f:
+            f.write(pub_key.public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo
+            ))
+
+        print(f"Generated new public key at {path}")
+
+    def load_private_key(self, path):
+        with open(path, "rb") as f:
+            self.private_key = serialization.load_pem_private_key(
                 f.read(),
                 password=self.password,
                 backend=default_backend()
             )
 
     def signature(self, message):
-        signature = self.key.sign(
+        signature = self.private_key.sign(
             message,
             padding.PSS(
                 mgf=padding.MGF1(hashes.SHA256()),

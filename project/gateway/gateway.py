@@ -10,6 +10,9 @@ import authentication
 DEFAULT_GATEWAY_PORT = 2137
 DEFAULT_SERVERS = [("127.0.0.1", 2140), ("127.0.0.1", 2141)]
 DEFAULT_INTERVAL = 3
+DEFAULT_PRIVATE_KEY_PATH = "./privkey.pem"
+DEFAULT_PUBLIC_KEY_PATH = "../server/pubkey.pem"
+DEFAULT_KEY_PASSWORD = "Qwerty123"
 
 
 def create_parser():
@@ -17,7 +20,10 @@ def create_parser():
     parser.add_argument("-p", "--port", default=DEFAULT_GATEWAY_PORT, help="port of the gateway")
     parser.add_argument("-s", "--server", dest="server_strs", action="append", help="ip:port of a server")
     parser.add_argument("-i", "--interval", default=DEFAULT_INTERVAL, help="interval between messages in seconds")
-    parser.add_argument("-k", "--key", help="path to the private key in .pem format")
+    parser.add_argument("--private_key", default=DEFAULT_PRIVATE_KEY_PATH,
+                        help="path to the private key in .pem format")
+    parser.add_argument("--public_key", default=DEFAULT_PUBLIC_KEY_PATH, help="path to the public key in .pem format")
+    parser.add_argument("--key_password", default=DEFAULT_KEY_PASSWORD, help="password to the private key")
     parser.add_argument("-v", "--verbose", action="store_true")
     return parser
 
@@ -36,7 +42,7 @@ def main():
     listen_socket.bind(listen_port)
     print(f'Gateway listening on port {args.port}')
 
-    authentication_center = authentication.AuthenticationCenter(path=args.key)
+    authentication_center = authentication.AuthenticationCenter(args.private_key, args.public_key, args.key_password)
 
     thread = Thread(target=transmission.transmit,
                     args=(servers, int(args.interval), authentication_center, args.verbose))
