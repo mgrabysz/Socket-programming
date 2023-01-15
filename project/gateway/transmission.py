@@ -1,12 +1,12 @@
 import json
 import socket
 import time
-from typing import Any
+from typing import Any, Dict
 
 import authentication
 import registration
 
-_registered_devices = set()
+_registered_devices: Dict[int, registration.Address] = {}
 _package = dict()
 
 
@@ -19,8 +19,8 @@ def _reset_package():
     global _package
     _package = dict()
     _package["devices"] = dict()
-    for device in _registered_devices:
-        _package["devices"][device] = []
+    for device_id in _registered_devices.keys():
+        _package["devices"][device_id] = []
 
 
 def _check_registered_devices():
@@ -56,14 +56,14 @@ def handle_message(message: dict):
     print(f"handling transmission message: {message}")
 
     if (
-        "device_id" not in message
-        or "timestamp" not in message
-        or "payload" not in message
+            "device_id" not in message
+            or "timestamp" not in message
+            or "payload" not in message
     ):
         print("Incomplete transmission")
         return
 
-    if message["device_id"] not in _registered_devices:
+    if message["device_id"] not in _registered_devices.keys():
         print(f"Invalid device id={message['device_id']}, device is not registered!")
         return
 
@@ -71,10 +71,10 @@ def handle_message(message: dict):
 
 
 def transmit(
-    servers: list[tuple[str, int]],
-    interval: float,
-    ac: authentication.AuthenticationCenter,
-    verbose: bool,
+        servers: list[tuple[str, int]],
+        interval: float,
+        ac: authentication.AuthenticationCenter,
+        verbose: bool,
 ):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
@@ -84,9 +84,9 @@ def transmit(
         signature = ac.signature(msg_bytes)
         print("Message send to servers:")
         if verbose:
-            print(f"Signature: {signature}")
+            print(f"Signature: {signature.hex()}")
         else:
-            print(f"Signature: {signature[0:10]}...")
+            print(f"Signature: {signature[:10].hex()}...")
         print(f"Payload: {msg_to_send}")
         _update_registered_devices()
         _reset_package()

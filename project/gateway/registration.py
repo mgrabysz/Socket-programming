@@ -1,35 +1,43 @@
-_registered_devices = set()
+from typing import Tuple, Dict
+
+Address = Tuple[str, int]
+
+_registered_devices: Dict[int, Address] = {}
 
 
-def _register(device_id: int):
+def _register(address: Address, device_id: int):
     global _registered_devices
-    number_of_devices = len(_registered_devices)
-    _registered_devices.add(device_id)
-    if number_of_devices == len(_registered_devices):
-        print(f"Devce with id={device_id} already registered, can not be registered!")
-    else:
-        print(f"Registered device {device_id}")
+
+    if device_id in _registered_devices.keys():
+        print(f"Device {device_id} already registered")
+        return
+
+    if address in _registered_devices.values():
+        print(f"Device with address {address} already registered")
+        return
+
+    _registered_devices[device_id] = address
+    print(f"Registered device {device_id} with address {address[0]}:{address[1]}")
 
 
 def _unregister(device_id: int):
     global _registered_devices
-    number_of_devices = len(_registered_devices)
-    _registered_devices.discard(device_id)
-    if number_of_devices == len(_registered_devices):
-        print(f"Device with id={device_id} not registered, can not be unregistered!")
-    else:
-        print(f"Unregistered device {device_id}")
+
+    if device_id not in _registered_devices.keys():
+        print(f"Can't unregister device {device_id} because it is not registered")
+        return
+
+    _registered_devices.pop(device_id)
+    print(f"Unregistered device {device_id}")
 
 
-def get_registered_devices() -> set[int]:
+def get_registered_devices() -> Dict[int, Address]:
     global _registered_devices
     return _registered_devices
 
 
-def handle_message(address: tuple[str, int], message: dict):
-    print(f"handling registration message: {message}")
-
+def handle_message(address: Address, message: dict):
     if message['action'] == "register":
-        _register(message['device_id'])
+        _register(address, message['device_id'])
     elif message['action'] == "unregister":
         _unregister(message['device_id'])
