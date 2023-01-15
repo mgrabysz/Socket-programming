@@ -15,8 +15,8 @@ INTERVAL = 3  # interval between messages in seconds
 
 
 class Client:
-    def __init__(self, device_id, server_ip, server_port, client_socket, lock):
-        self.socket = client_socket
+    def __init__(self, device_id, server_ip, server_port, lock):
+        self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.lock = lock
         self.device_id = device_id
         self.server_address = (server_ip, server_port)
@@ -58,13 +58,12 @@ class Client:
 
 
 class ClientManager:
-    def __init__(self, client_socket, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id):
+    def __init__(self, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id):
         self.num_of_devices = num_of_devices
         self.interval = interval
         self.num_of_messages = num_of_messages
         self.server_port = server_port
         self.server_ip = server_ip
-        self.client_socket = client_socket
         self.lock = Lock()
         self.threads = []
         self.first_id = first_id
@@ -74,7 +73,7 @@ class ClientManager:
         for i in range(self.num_of_devices):
             self.threads.append(Thread(target=multi_threaded_client, args=(
                 self.first_id + i, self.server_ip, self.server_port,
-                self.num_of_messages, self.interval, self.client_socket, self.lock
+                self.num_of_messages, self.interval, self.lock
             )))
 
         for thread in self.threads:
@@ -95,8 +94,8 @@ def create_parser():
     return parser
 
 
-def multi_threaded_client(device_id, server_ip, server_port, num_of_messages, interval, client_socket, lock):
-    client = Client(device_id, server_ip, server_port, client_socket, lock)
+def multi_threaded_client(device_id, server_ip, server_port, num_of_messages, interval, lock):
+    client = Client(device_id, server_ip, server_port, lock)
     client.transmit(num_of_messages, interval)
 
 
@@ -104,10 +103,7 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
-    client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-
     client_manager = ClientManager(
-        client_socket=client_socket,
         server_ip=args.address,
         server_port=int(args.port),
         num_of_devices=int(args.devices),
