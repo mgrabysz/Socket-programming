@@ -15,6 +15,47 @@ DEFAULT_PUBLIC_KEY_PATH = "../server/pubkey.pem"
 DEFAULT_KEY_PASSWORD = "Qwerty123"
 
 
+class Gateway:
+    def __init__(self, port: int, servers, interval: int, private_key, public_key, key_password, is_verbose):
+        self.port = port
+        self.servers = servers
+        self.interval = interval
+        self.private_key = private_key
+        self.public_key = public_key
+        self.key_password = key_password
+        self.is_verbose = is_verbose
+
+    def start(self):
+        listen_port = ('', self.port)
+        listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        listen_socket.bind(listen_port)
+        print(f'Gateway listening on port {self.port}')
+
+        authentication_center = authentication.AuthenticationCenter(self.private_key, self.public_key,
+                                                                    self.key_password)
+
+        thread = Thread(target=transmission.transmit,
+                        args=(self.servers, self.interval, authentication_center, self.is_verbose))
+        thread.start()
+
+        while True:
+            message_bytes, address = listen_socket.recvfrom(65536)
+            message_json = json.loads(message_bytes)
+            print(f'Received message: {message_json}')
+
+            if 'action' not in message_json:
+                print('No action field in message')
+                return
+
+            action = message_json['action']
+            if action in {'register', 'unregister'}:
+                registration.handle_message(address, message_json)
+            elif action == 'transmit':
+                transmission.handle_message(message_json)
+            else:
+                print(f'Invalid action {action}')
+
+
 def create_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", default=DEFAULT_GATEWAY_PORT, help="port of the gateway")
@@ -37,34 +78,16 @@ def main():
     else:
         servers = [(server_str.split(':')[0], int(server_str.split(':')[1])) for server_str in args.server_strs]
 
-    listen_port = ('', int(args.port))
-    listen_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    listen_socket.bind(listen_port)
-    print(f'Gateway listening on port {args.port}')
-
-    authentication_center = authentication.AuthenticationCenter(args.private_key, args.public_key, args.key_password)
-
-    thread = Thread(target=transmission.transmit,
-                    args=(servers, int(args.interval), authentication_center, args.verbose))
-    thread.start()
-
-    while True:
-        message_bytes, address = listen_socket.recvfrom(65536)
-        message_json = json.loads(message_bytes)
-
-        print(f'Received message: {message_json}')
-
-        if 'action' not in message_json:
-            print('No action field in message')
-            return
-
-        action = message_json['action']
-        if action in {'register', 'unregister'}:
-            registration.handle_message(address, message_json)
-        elif action == 'transmit':
-            transmission.handle_message(message_json)
-        else:
-            print(f'Invalid action {action}')
+    gateway = Gateway(
+        port=int(args.port),
+        servers=servers,
+        interval=int(args.interval),
+        private_key=args.private_key,
+        public_key=args.public_key,
+        key_password=args.key_password,
+        is_verbose=args.verbose
+    )
+    gateway.start()
 
 
 if __name__ == "__main__":
