@@ -9,7 +9,7 @@ PATH_TO_KEY = "./key.pem"
 PASSWORD = "Qwerty123"
 
 
-class AuthorizationCenter:
+class AuthenticationCenter:
     def __init__(self, path=None, password=PASSWORD):
         self.password = password.encode('utf-8')
         self.key = None

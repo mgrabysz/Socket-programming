@@ -3,7 +3,7 @@ import socket
 import time
 from typing import Any
 
-import authorization
+import authentication
 import registration
 
 _registered_devices = set()
@@ -73,7 +73,7 @@ def handle_message(message: dict):
 def transmit(
     servers: list[tuple[str, int]],
     interval: float,
-    ac: authorization.AuthorizationCenter,
+    ac: authentication.AuthenticationCenter,
     verbose: bool,
 ):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)

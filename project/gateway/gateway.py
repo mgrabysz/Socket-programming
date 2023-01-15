@@ -5,7 +5,7 @@ from threading import Thread
 
 import registration
 import transmission
-import authorization
+import authentication
 
 DEFAULT_GATEWAY_PORT = 2137
 DEFAULT_SERVERS = [("127.0.0.1", 2140), ("127.0.0.1", 2141)]
@@ -36,14 +36,14 @@ def main():
     listen_socket.bind(listen_port)
     print(f'Gateway listening on port {args.port}')
 
-    authorization_center = authorization.AuthorizationCenter(path=args.key)
+    authentication_center = authentication.AuthenticationCenter(path=args.key)
 
     thread = Thread(target=transmission.transmit,
-                    args=(servers, int(args.interval), authorization_center, args.verbose))
+                    args=(servers, int(args.interval), authentication_center, args.verbose))
     thread.start()
 
     while True:
-        message_bytes = listen_socket.recv(65536)
+        message_bytes, address = listen_socket.recvfrom(65536)
         message_json = json.loads(message_bytes)
 
         print(f'Received message: {message_json}')
@@ -54,7 +54,7 @@ def main():
 
         action = message_json['action']
         if action in {'register', 'unregister'}:
-            registration.handle_message(message_json)
+            registration.handle_message(address, message_json)
         elif action == 'transmit':
             transmission.handle_message(message_json)
         else:
