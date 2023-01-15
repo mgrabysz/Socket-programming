@@ -23,9 +23,11 @@ class Server:
 
     def listen(self):
         message_bytes = self.server_socket.recv(BUF_SIZE)
-        message_json = json.loads(message_bytes)
+        print(f'Server nr {self.device_id} received message: {message_bytes.hex()}')
 
-        print(f'Server nr {self.device_id} received message: {message_json}')
+        # todo: first 256 bytes of message are a signature, rest is json payload
+        # message_json = json.loads(message_bytes)
+        # print(f'Server nr {self.device_id} received message: {message_json}')
 
 
 class ServerManager:
