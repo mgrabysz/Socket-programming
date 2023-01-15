@@ -32,7 +32,7 @@ def _check_registered_devices():
             unused_devices.append(device)
     if len(unused_devices) != 0:
         print(
-            f"Registered devices that did not send any transmittion data: {unused_devices}"
+            f"Registered devices that did not send any transmission data: {unused_devices}"
         )
 
 
