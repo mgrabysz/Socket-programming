@@ -4,8 +4,8 @@ import socket
 import time
 from threading import Thread
 
-import authentication
 import registration
+import authentication
 import sync
 import transmission
 
