@@ -2,23 +2,23 @@ services:
   server1: &server
     build: server
     tty: true
-    # command: -p 8082
+    command: -p 8082
   server2:
     <<: *server
-    # command: -p 8081
+    command: -p 8081
   gateway:
     build: gateway
     tty: true
-    command: -p 8000 -i 5 -s server1:2140 -s server2:2140 # -s server1:8082 -s server2:8081
+    command: -p 8000 -i 10 --sync_interval 15 -s server1:8082 -s server2:8081
   client1: &client
     build: client
     tty: true
     depends_on:
       - gateway
-    command: -a gateway -p 8000 -d 1 -m 60 -i 5 --id 1
+    command: -a gateway -p 8000 -d 1 -m 60 -i 2 --id 1
   client2:
     <<: *client
-    command: -a gateway -p 8000 -d 1 -m 60 -i 5 --id 2
+    command: -a gateway -p 8000 -d 1 -m 60 -i 2 --id 2
   client3:
     <<: *client
-    command: -a gateway -p 8000 -d 1 -m 60 -i 5 --id 3
+    command: -a gateway -p 8000 -d 1 -m 60 -i 2 --id 3

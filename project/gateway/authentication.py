@@ -1,3 +1,9 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Marcin Grabysz
+Data utworzenia: 10.01.2022
+"""
+
 import os.path
 
 from cryptography.hazmat.backends import default_backend

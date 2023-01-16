@@ -1,3 +1,9 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Marcin Grabysz
+Data utworzenia: 15.01.2023
+"""
+
 import unittest
 
 import gateway.registration as registration

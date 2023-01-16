@@ -1,3 +1,8 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Szymon Wysocki
+Data utworzenia: 27.12.2022
+"""
 from typing import Tuple, Dict
 
 import logging

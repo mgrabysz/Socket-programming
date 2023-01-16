@@ -1,3 +1,9 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Patrycja Wysocka
+Data utworzenia: 29.12.2022
+"""
+
 import json
 import socket
 import argparse

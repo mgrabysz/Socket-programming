@@ -1,3 +1,9 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Jan Jędrzejewski
+Data utworzenia: 01.01.2022
+"""
+
 import json
 import socket
 import time

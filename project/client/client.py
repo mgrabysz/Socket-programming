@@ -1,3 +1,9 @@
+"""
+Projekt PSI - System agregacji dokumentów
+Autorzy: Marcin Grabysz
+Data utworzenia: 27.12.2022
+"""
+
 import argparse
 import json
 import random
