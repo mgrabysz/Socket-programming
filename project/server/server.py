@@ -86,8 +86,8 @@ def multi_threaded_server(device_id, port, host_ip, lock, public_key_path):
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--server_ports", dest="server_strs", 
-                        action="append", help="ip:port of a server")
+    parser.add_argument("-p", "--port", dest="server_ports",
+                        action="append", help="server port")
     parser.add_argument("-pk", "--public_key", default=DEFAULT_PUBLIC_KEY_PATH,
                         help="path to the public key in .pem format")
     return parser
@@ -96,12 +96,11 @@ def create_parser():
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    print(args.server_strs)
-    if not args.server_strs:
+    if not args.server_ports:
         servers_ports = DEAFULT_SERVER_PORTS
         num_of_devices = NUM_OF_DEVICES
     else:
-        servers_ports = [int(server_str) for server_str in args.server_strs]
+        servers_ports = [int(port) for port in args.server_ports]
         num_of_devices = len(servers_ports)
         if num_of_devices > 32:
             raise Exception("Number of servers can't be greater than 32!")
