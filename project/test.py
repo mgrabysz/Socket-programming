@@ -1,12 +1,13 @@
 import unittest
+import sys
 
-from gateway import gateway
-
+sys.path.append('./gateway')
+import gateway
 
 class TestStringMethods(unittest.TestCase):
 
     def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
+        self.assertEqual('foo'.upper(), 'FOO') 
 
     def test_isupper(self):
         self.assertTrue('FOO'.isupper())

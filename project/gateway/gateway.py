@@ -3,7 +3,8 @@ import json
 import socket
 from threading import Thread
 
-import registration
+
+from registration import *
 import transmission
 import authentication
 
