@@ -18,22 +18,26 @@ JITTER = 0.1
 
 
 class Client:
-    def __init__(self, device_id, server_ip, server_port, lock, interval):
+    def __init__(self, device_id, server_ip, server_port, lock, interval, random_start, initial_jitter):
         self.socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
         self.lock = lock
         self.device_id = device_id
         self.server_address = (server_ip, server_port)
         self.interval = interval
+        self.jitter = initial_jitter
         self.reference_time = time.time()
-        self.jitter = JITTER
+
+        if random_start:
+            self.reference_time += self.interval * random.random()
 
         Thread(target=self.listen_for_sync_messages, args=()).start()
 
-    def next_transmit_window_center(self) -> float:
+    def next_transmit(self) -> tuple[int, float]:
         jitter_seconds = self.jitter * self.interval
         seconds_since_reference = time.time() - self.reference_time
-        completed_transmissions = (seconds_since_reference + jitter_seconds) // self.interval
-        return self.reference_time + (completed_transmissions + 1) * self.interval
+        next_transmit_index = int((seconds_since_reference + jitter_seconds) // self.interval + 1)
+        next_transmit_time = self.reference_time + next_transmit_index * self.interval
+        return next_transmit_index, next_transmit_time
 
     def listen_for_sync_messages(self):
         while True:
@@ -51,11 +55,11 @@ class Client:
 
         for _ in range(num_of_messages):
             random_offset = random.uniform(-self.jitter, self.jitter) * self.interval
-            next_transmit = self.next_transmit_window_center() + random_offset
-            time.sleep(next_transmit - time.time())
+            next_transmit_index, next_transmit_time = self.next_transmit()
+            time.sleep(next_transmit_time - time.time() + random_offset)
 
             payload = random.random()
-            self.send_transmission_message(payload)
+            self.send_transmission_message(next_transmit_index, payload)
 
         self.send_unregister_message()
 
@@ -73,16 +77,17 @@ class Client:
         with self.lock:
             print(f'Sent unregister message from device {self.device_id}')
 
-    def send_transmission_message(self, payload):
+    def send_transmission_message(self, i, payload):
         register_message = TransmissionMessage(self.device_id, time.time(), payload)
         msg_bytes = register_message.to_json().encode()
         self.socket.sendto(msg_bytes, self.server_address)
         with self.lock:
-            print(f'Message sent: {payload} from device {self.device_id}')
+            print(f'Message {i} sent: {payload} from device {self.device_id}')
 
 
 class ClientManager:
-    def __init__(self, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id):
+    def __init__(self, server_ip, server_port, num_of_devices, num_of_messages, interval, first_id, random_start,
+                 initial_jitter):
         self.num_of_devices = num_of_devices
         self.interval = interval
         self.num_of_messages = num_of_messages
@@ -91,13 +96,15 @@ class ClientManager:
         self.lock = Lock()
         self.threads = []
         self.first_id = first_id
+        self.random_start = random_start
+        self.initial_jitter = initial_jitter
 
     def run_devices(self):
 
         for i in range(self.num_of_devices):
             self.threads.append(Thread(target=multi_threaded_client, args=(
-                self.first_id + i, self.server_ip, self.server_port,
-                self.num_of_messages, self.interval, self.lock
+                self.first_id + i, self.server_ip, self.server_port, self.num_of_messages, self.interval, self.lock,
+                self.random_start, self.initial_jitter
             )))
 
         for thread in self.threads:
@@ -114,12 +121,16 @@ def create_parser():
     parser.add_argument("-d", "--devices", default=NUM_OF_DEVICES, help="number of devices (threads) to be launched")
     parser.add_argument("-m", "--messages", default=NUM_OF_MESSAGES, help="number of messages to be sent from device")
     parser.add_argument("-i", "--interval", default=INTERVAL, help="interval between messages in seconds")
+    parser.add_argument("--random_start", action="store_true", help="add random delay before first transmission")
+    parser.add_argument("--initial_jitter", type=float, default=JITTER,
+                        help="jitter value to use before first synchronization")
     parser.add_argument("--id", default=0, help="id of the first device created")
     return parser
 
 
-def multi_threaded_client(device_id, server_ip, server_port, num_of_messages, interval, lock):
-    client = Client(device_id, server_ip, server_port, lock, interval)
+def multi_threaded_client(device_id, server_ip, server_port, num_of_messages, interval, lock, random_start,
+                          initial_jitter):
+    client = Client(device_id, server_ip, server_port, lock, interval, random_start, initial_jitter)
     client.transmit(num_of_messages)
 
 
@@ -133,7 +144,9 @@ def main():
         num_of_devices=int(args.devices),
         num_of_messages=int(args.messages),
         interval=int(args.interval),
-        first_id=int(args.id)
+        first_id=int(args.id),
+        initial_jitter=int(args.initial_jitter),
+        random_start=int(args.random_start)
     )
     client_manager.run_devices()
 
