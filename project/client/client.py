@@ -12,8 +12,9 @@ SERVER_IP = '127.0.0.1'
 SERVER_PORT = 2137
 NUM_OF_DEVICES = 5  # number of devices (threads) to be launched
 NUM_OF_MESSAGES = 5  # number of messages per thread to send
-INTERVAL = 3  # interval between messages in seconds
+INTERVAL = 10  # interval between messages in seconds
 BUF_SIZE = 65536  # size (bytes) of buffer used to receive sync messages
+JITTER = 0.1
 
 
 class Client:
@@ -24,6 +25,7 @@ class Client:
         self.server_address = (server_ip, server_port)
         self.interval = interval
         self.reference_time = time.time() - random.random() * interval
+        self.jitter = JITTER
 
         Thread(target=self.listen_for_sync_messages, args=()).start()
 
@@ -38,13 +40,14 @@ class Client:
             message_json = json.loads(message_bytes)
             print("Received sync message")
             self.reference_time = message_json["reference_time"]
+            self.jitter = message_json["jitter"]
 
     def transmit(self, num_of_messages):
         """
         :param num_of_messages: number of messages to be sent
         """
         self.send_register_message()
-
+        # @TODO hangle JITTER
         for _ in range(num_of_messages):
             time.sleep(self.next_transmit_time() - time.time())
 

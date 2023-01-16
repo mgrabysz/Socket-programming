@@ -1,5 +1,6 @@
 import json
 import socket
+import argparse
 from threading import Lock, Thread
 
 from cryptography.exceptions import InvalidSignature
@@ -9,9 +10,9 @@ from cryptography.hazmat.primitives.asymmetric import padding
 
 BUF_SIZE = 65536
 HOST_IP = ""
-PORTS = list(range(2140, 2142))
-NUM_OF_DEVICES = 1
-PUBLIC_KEY_PATH = "pubkey.pem"
+DEAFULT_SERVER_PORTS = list(range(2140, 2142))
+NUM_OF_DEVICES = 2
+DEFAULT_PUBLIC_KEY_PATH = "pubkey.pem"
 
 
 class Server:
@@ -21,7 +22,8 @@ class Server:
         self.port = port
         self.lock = lock
 
-        self.server_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+        self.server_socket = socket.socket(family=socket.AF_INET,
+                                           type=socket.SOCK_DGRAM)
 
         self.server_socket.bind((self.host_ip, self.port))
 
@@ -82,8 +84,30 @@ def multi_threaded_server(device_id, port, host_ip, lock, public_key_path):
         server.listen()
 
 
+def create_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--server_ports", dest="server_strs", 
+                        action="append", help="ip:port of a server")
+    parser.add_argument("-pk", "--public_key", default=DEFAULT_PUBLIC_KEY_PATH,
+                        help="path to the public key in .pem format")
+    return parser
+
+
 def main():
-    server_manager = ServerManager(PORTS, HOST_IP, NUM_OF_DEVICES, PUBLIC_KEY_PATH)
+    parser = create_parser()
+    args = parser.parse_args()
+    print(args.server_strs)
+    if not args.server_strs:
+        servers_ports = DEAFULT_SERVER_PORTS
+        num_of_devices = NUM_OF_DEVICES
+    else:
+        servers_ports = [int(server_str) for server_str in args.server_strs]
+        num_of_devices = len(servers_ports)
+        if num_of_devices > 32:
+            raise Exception("Number of servers can't be greater than 32!")
+
+    server_manager = ServerManager(servers_ports, HOST_IP,
+                                   num_of_devices, args.public_key)
     server_manager.run_devices()
 
 
