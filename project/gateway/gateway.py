@@ -11,25 +11,31 @@ import transmission
 
 DEFAULT_GATEWAY_PORT = 2137
 DEFAULT_SERVERS = [("127.0.0.1", 2140), ("127.0.0.1", 2141)]
-DEFAULT_INTERVAL = 3
-DEFAULT_SYNC_INTERVAL = 10
+DEFAULT_INTERVAL = 10
+DEFAULT_SYNC_INTERVAL = 15
 DEFAULT_PRIVATE_KEY_PATH = "./privkey.pem"
 DEFAULT_PUBLIC_KEY_PATH = "../server/pubkey.pem"
 DEFAULT_KEY_PASSWORD = "Qwerty123"
+JITTER = 0.1
+
+import logging
+logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
 
 
 class Gateway:
-    def __init__(self, port: int, servers, interval: float, sync_interval: float, private_key, public_key, key_password,
+    def __init__(self, port: int, servers, interval: float, sync_interval: float, jitter:float, private_key, public_key, key_password,
                  is_verbose):
         self.port = port
         self.servers = servers
         self.interval = interval
         self.sync_interval = sync_interval
+        self.jitter = jitter
         self.private_key = private_key
         self.public_key = public_key
         self.key_password = key_password
         self.is_verbose = is_verbose
         self.reference_time = time.time()
+        self.loger = logging.getLogger(__name__)
 
     def start(self):
         listen_port = ('', self.port)
@@ -49,7 +55,7 @@ class Gateway:
         # start a thread for sending sync messages to clients
         Thread(
             target=sync.send_sync_messages,
-            args=(self.sync_interval, self.reference_time)
+            args=(self.sync_interval, self.reference_time, len(self.servers))
         ).start()
 
         while True:
@@ -58,7 +64,9 @@ class Gateway:
             print(f'Received message: {message_json}')
 
             if 'action' not in message_json:
-                print('No action field in message')
+                msg = 'No action field in message'
+                print(msg)
+                self.loger.error(msg)
                 return
 
             action = message_json['action']
@@ -67,7 +75,9 @@ class Gateway:
             elif action == 'transmit':
                 transmission.handle_message(message_json)
             else:
-                print(f'Invalid action {action}')
+                msg = f'Invalid action {action}'
+                print(msg)
+                self.loger.error(msg)
 
 
 def create_parser():
@@ -77,6 +87,8 @@ def create_parser():
     parser.add_argument("-i", "--interval", default=DEFAULT_INTERVAL, help="interval between messages in seconds")
     parser.add_argument("--sync_interval", default=DEFAULT_SYNC_INTERVAL,
                         help="interval between time synchronization messages in seconds")
+    parser.add_argument("-j", "--jitter", default=JITTER,
+                        help="applied jitter")
     parser.add_argument("--private_key", default=DEFAULT_PRIVATE_KEY_PATH,
                         help="path to the private key in .pem format")
     parser.add_argument("--public_key", default=DEFAULT_PUBLIC_KEY_PATH, help="path to the public key in .pem format")
@@ -99,6 +111,7 @@ def main():
         servers=servers,
         interval=int(args.interval),
         sync_interval=int(args.sync_interval),
+        jitter=int(args.jitter),
         private_key=args.private_key,
         public_key=args.public_key,
         key_password=args.key_password,

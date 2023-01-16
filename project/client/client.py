@@ -12,8 +12,9 @@ SERVER_IP = '127.0.0.1'
 SERVER_PORT = 2137
 NUM_OF_DEVICES = 5  # number of devices (threads) to be launched
 NUM_OF_MESSAGES = 5  # number of messages per thread to send
-INTERVAL = 3  # interval between messages in seconds
+INTERVAL = 10  # interval between messages in seconds
 BUF_SIZE = 65536  # size (bytes) of buffer used to receive sync messages
+JITTER = 0.1
 
 
 class Client:
@@ -23,21 +24,24 @@ class Client:
         self.device_id = device_id
         self.server_address = (server_ip, server_port)
         self.interval = interval
-        self.reference_time = time.time() - random.random() * interval
+        self.reference_time = time.time()
+        self.jitter = JITTER
 
         Thread(target=self.listen_for_sync_messages, args=()).start()
 
-    def next_transmit_time(self) -> float:
-        elapsed = time.time() - self.reference_time
-        completed_transmissions = elapsed // self.interval
-        return self.reference_time + completed_transmissions * self.interval + self.interval
+    def next_transmit_window_center(self) -> float:
+        jitter_seconds = self.jitter * self.interval
+        seconds_since_reference = time.time() - self.reference_time
+        completed_transmissions = (seconds_since_reference + jitter_seconds) // self.interval
+        return self.reference_time + (completed_transmissions + 1) * self.interval
 
     def listen_for_sync_messages(self):
         while True:
             message_bytes = self.socket.recv(BUF_SIZE)
             message_json = json.loads(message_bytes)
-            print("Received sync message")
             self.reference_time = message_json["reference_time"]
+            self.jitter = message_json["jitter"]
+            print(f"Received sync message, reference {self.reference_time}, jitter {self.jitter}")
 
     def transmit(self, num_of_messages):
         """
@@ -46,7 +50,9 @@ class Client:
         self.send_register_message()
 
         for _ in range(num_of_messages):
-            time.sleep(self.next_transmit_time() - time.time())
+            random_offset = random.uniform(-self.jitter, self.jitter) * self.interval
+            next_transmit = self.next_transmit_window_center() + random_offset
+            time.sleep(next_transmit - time.time())
 
             payload = random.random()
             self.send_transmission_message(payload)

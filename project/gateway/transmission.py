@@ -6,6 +6,10 @@ from typing import Any, Dict
 import authentication
 import registration
 
+import logging
+logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger = logging.getLogger(__name__)
+
 _registered_devices: Dict[int, registration.Address] = {}
 _package = dict()
 
@@ -28,12 +32,12 @@ def _check_registered_devices():
     unused_devices = []
     for device in _package["devices"].keys():
         if len(_package["devices"][device]) == 0:
-            _package["devices"][device] = None
+            _package["devices"][device] = None 
             unused_devices.append(device)
     if len(unused_devices) != 0:
-        print(
-            f"Registered devices that did not send any transmission data: {unused_devices}"
-        )
+        msg = f"Registered devices that did not send any transmission data: {unused_devices}"
+        print(msg)
+        logger.info(msg)
 
 
 def _get_package() -> dict:
@@ -60,11 +64,15 @@ def handle_message(message: dict):
             or "timestamp" not in message
             or "payload" not in message
     ):
-        print("Incomplete transmission")
+        msg = "Incomplete transmission"
+        print(msg)
+        logger.warning(msg)
         return
 
     if message["device_id"] not in _registered_devices.keys():
-        print(f"Invalid device id={message['device_id']}, device is not registered!")
+        msg = f"Invalid device id={message['device_id']}, device is not registered!"
+        print(msg)
+        logger.warning(msg)
         return
 
     _add_payload_to_package(message["device_id"], message["payload"])
