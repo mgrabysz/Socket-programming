@@ -5,21 +5,22 @@ from typing import Any, Dict
 
 import authentication
 import registration
-
 import logging
-logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+
+logging.basicConfig(filename='./gateway.log', level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
 
 _registered_devices: Dict[int, registration.Address] = {}
 _package = dict()
 
 
-def _update_registered_devices():
+def _update_registered_devices() -> None:
     global _registered_devices
     _registered_devices = registration.get_registered_devices()
 
 
-def _reset_package():
+def _reset_package() -> None:
     global _package
     _package = dict()
     _package["devices"] = dict()
@@ -27,12 +28,12 @@ def _reset_package():
         _package["devices"][device_id] = []
 
 
-def _check_registered_devices():
+def _check_registered_devices() -> None:
     global _package
     unused_devices = []
     for device in _package["devices"].keys():
         if len(_package["devices"][device]) == 0:
-            _package["devices"][device] = None 
+            _package["devices"][device] = None
             unused_devices.append(device)
     if len(unused_devices) != 0:
         msg = f"Registered devices that did not send any transmission data: {unused_devices}"
@@ -49,14 +50,14 @@ def _get_package() -> dict:
     return _package
 
 
-def _add_payload_to_package(device_id: int, payload: Any):
+def _add_payload_to_package(device_id: int, payload: Any) -> None:
     global _package
     if device_id not in _package["devices"].keys():
         _package["devices"][device_id] = []
     _package["devices"][device_id].append(payload)
 
 
-def handle_message(message: dict):
+def handle_message(message: dict) -> None:
     print(f"handling transmission message: {message}")
 
     if (
@@ -84,8 +85,9 @@ def transmit(
         ac: authentication.AuthenticationCenter,
         verbose: bool,
         reference_time: float
-):
-    udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
+) -> None:
+    udp_client_socket = socket.socket(family=socket.AF_INET,
+                                      type=socket.SOCK_DGRAM)
 
     while True:
         msg_to_send = _get_package()
@@ -101,8 +103,9 @@ def transmit(
         _reset_package()
 
         for server in servers:
-            bytes_sent = udp_client_socket.sendto(signature + msg_bytes, server)
-            print(f"{bytes_sent} bytes send to server {server[0]}:{server[1]}")
+            bytes_sent = udp_client_socket.sendto(
+                signature + msg_bytes, server)
+            print(f"{bytes_sent} bytes send to server {server[0]}: {server[1]}")
 
         print("")
-        time.sleep(interval)  # todo use reference time to calculate how long to sleep
+        time.sleep(interval)

@@ -1,7 +1,8 @@
 from typing import Tuple, Dict
 
 import logging
-logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logging.basicConfig(filename='./gateway.log', level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger = logging.getLogger(__name__)
 
 Address = Tuple[str, int]
@@ -9,7 +10,7 @@ Address = Tuple[str, int]
 _registered_devices: Dict[int, Address] = {}
 
 
-def _register(address: Address, device_id: int):
+def _register(address: Address, device_id: int) -> None:
     global _registered_devices
 
     if device_id in _registered_devices.keys():
@@ -28,7 +29,7 @@ def _register(address: Address, device_id: int):
     print(f"Registered device {device_id} with address {address[0]}:{address[1]}")
 
 
-def _unregister(device_id: int):
+def _unregister(device_id: int) -> None:
     global _registered_devices
 
     if device_id not in _registered_devices.keys():
@@ -46,14 +47,17 @@ def get_registered_devices() -> Dict[int, Address]:
     return _registered_devices
 
 
-def handle_message(address: Address, message: dict):
+def handle_message(address: Address, message: dict) -> None:
     if message['action'] == "register":
         _register(address, message['device_id'])
     elif message['action'] == "unregister":
         _unregister(message['device_id'])
 
 
-__all__ = ["_register", "_unregister", "get_registered_devices", "handle_message"]
+__all__ = ["_register",
+           "_unregister",
+           "get_registered_devices",
+           "handle_message"]
 
 if __name__ == "__main__":
     pass

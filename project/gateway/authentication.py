@@ -8,7 +8,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 
 
 class AuthenticationCenter:
-    def __init__(self, private_key_path, public_key_path, password):
+    def __init__(self, private_key_path: str, public_key_path: str,
+                 password: str) -> None:
         self.password = password.encode('utf-8')
         self.private_key = None
 
@@ -18,7 +19,7 @@ class AuthenticationCenter:
             self.generate_private_key(private_key_path)
             self.generate_public_key(public_key_path)
 
-    def generate_private_key(self, path: str):
+    def generate_private_key(self, path: str) -> None:
         self.private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=2048,
@@ -34,7 +35,7 @@ class AuthenticationCenter:
 
         print(f"Generated new private key at {path}")
 
-    def generate_public_key(self, path: str):
+    def generate_public_key(self, path: str) -> None:
         pub_key = self.private_key.public_key()
 
         with open(path, "wb") as f:
@@ -45,7 +46,7 @@ class AuthenticationCenter:
 
         print(f"Generated new public key at {path}")
 
-    def load_private_key(self, path):
+    def load_private_key(self, path: str) -> None:
         with open(path, "rb") as f:
             self.private_key = serialization.load_pem_private_key(
                 f.read(),
@@ -53,7 +54,7 @@ class AuthenticationCenter:
                 backend=default_backend()
             )
 
-    def signature(self, message):
+    def signature(self, message: bytes) -> bytes:
         signature = self.private_key.sign(
             message,
             padding.PSS(

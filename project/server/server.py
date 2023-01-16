@@ -16,7 +16,8 @@ DEFAULT_PUBLIC_KEY_PATH = "pubkey.pem"
 
 
 class Server:
-    def __init__(self, device_id, host_ip, port, lock, public_key_path):
+    def __init__(self, device_id: int, host_ip: int, port: int,
+                 lock: Lock, public_key_path: str) -> None:
         self.device_id = device_id
         self.host_ip = host_ip
         self.port = port
@@ -32,7 +33,7 @@ class Server:
         with open(public_key_path, "rb") as f:
             self.public_key = serialization.load_pem_public_key(f.read())
 
-    def listen(self):
+    def listen(self) -> None:
         message_bytes = self.server_socket.recv(BUF_SIZE)
 
         signature, payload_bytes = message_bytes[:256], message_bytes[256:]
@@ -52,11 +53,13 @@ class Server:
             return
 
         payload_json = json.loads(payload_bytes)
-        print(f'Server nr {self.device_id} received verified message: {payload_json}')
+        print(f'Server nr {self.device_id} ' +
+              f'received verified message: {payload_json}')
 
 
 class ServerManager:
-    def __init__(self, ports, host_ip, num_of_devices, public_key_path):
+    def __init__(self, ports: int, host_ip: int,
+                 num_of_devices: int, public_key_path: str) -> None:
         self.ports = ports
         self.host_ip = host_ip
         self.num_of_devices = num_of_devices
@@ -86,7 +89,7 @@ def multi_threaded_server(device_id, port, host_ip, lock, public_key_path):
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--server_ports", dest="server_strs", 
+    parser.add_argument("-s", "--server_ports", dest="server_strs",
                         action="append", help="ip:port of a server")
     parser.add_argument("-pk", "--public_key", default=DEFAULT_PUBLIC_KEY_PATH,
                         help="path to the public key in .pem format")
