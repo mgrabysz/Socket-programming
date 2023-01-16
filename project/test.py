@@ -1,13 +1,7 @@
-import socket
-import sys
-import threading
-import time
 import unittest
 
-sys.path.append('../gateway')
 import gateway.registration as registration
 import client.messages as messages
-import gateway.gateway as gtw
 
 
 class TestRegistration(unittest.TestCase):
@@ -44,30 +38,6 @@ class TestRegistration(unittest.TestCase):
         address = ("127.0.0.1", 2140)
         registration.handle_message(address, message)
         self.assertFalse(1 in registration.get_registered_devices().keys())
-
-
-# class TestGateway(unittest.TestCase):
-#
-#     def test_gateway(self):
-#         test_gateway = gtw.Gateway(
-#             port=gtw.DEFAULT_GATEWAY_PORT,
-#             servers=gtw.DEFAULT_SERVERS,
-#             interval=gtw.DEFAULT_INTERVAL,
-#             sync_interval=gtw.DEFAULT_SYNC_INTERVAL,
-#             private_key=gtw.DEFAULT_PRIVATE_KEY_PATH,
-#             public_key=gtw.DEFAULT_PUBLIC_KEY_PATH,
-#             key_password=gtw.DEFAULT_KEY_PASSWORD,
-#             is_verbose=False
-#         )
-#         gateway_thread = threading.Thread(target=test_gateway.start())
-#         gateway_thread.start()
-#         time.sleep(0.000001)
-#
-#         mock_client = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-#         register_message = messages.RegisterMessage(1, 1673876709.461439)
-#         msg_bytes = register_message.to_json().encode()
-#         mock_client.sendto(msg_bytes, ("127.0.0.1", gtw.DEFAULT_GATEWAY_PORT))
-
 
 
 if __name__ == '__main__':
