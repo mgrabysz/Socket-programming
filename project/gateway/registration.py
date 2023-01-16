@@ -41,3 +41,11 @@ def handle_message(address: Address, message: dict):
         _register(address, message['device_id'])
     elif message['action'] == "unregister":
         _unregister(message['device_id'])
+
+__all__ = ["_register", "_unregister", "get_registered_devices", "handle_message"]
+
+
+if __name__ == "__main__":
+    pass
+
+
