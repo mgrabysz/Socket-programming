@@ -75,6 +75,7 @@ def transmit(
         interval: float,
         ac: authentication.AuthenticationCenter,
         verbose: bool,
+        reference_time: float
 ):
     udp_client_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
@@ -96,4 +97,4 @@ def transmit(
             print(f"{bytes_sent} bytes send to server {server[0]}:{server[1]}")
 
         print("")
-        time.sleep(interval)
+        time.sleep(interval)  # todo use reference time to calculate how long to sleep
