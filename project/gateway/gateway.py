@@ -16,7 +16,7 @@ DEFAULT_SYNC_INTERVAL = 15
 DEFAULT_PRIVATE_KEY_PATH = "./privkey.pem"
 DEFAULT_PUBLIC_KEY_PATH = "../server/pubkey.pem"
 DEFAULT_KEY_PASSWORD = "Qwerty123"
-JITTER = 0.1
+JITTER = None
 
 import logging
 logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
@@ -55,7 +55,7 @@ class Gateway:
         # start a thread for sending sync messages to clients
         Thread(
             target=sync.send_sync_messages,
-            args=(self.sync_interval, self.reference_time, len(self.servers))
+            args=(self.sync_interval, self.reference_time, len(self.servers), self.jitter)
         ).start()
 
         while True:
@@ -111,7 +111,7 @@ def main():
         servers=servers,
         interval=int(args.interval),
         sync_interval=int(args.sync_interval),
-        jitter=int(args.jitter),
+        jitter=float(args.jitter),
         private_key=args.private_key,
         public_key=args.public_key,
         key_password=args.key_password,

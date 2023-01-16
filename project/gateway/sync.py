@@ -1,6 +1,7 @@
 import json
 import time
 import socket
+from typing import Optional
 
 import registration
 
@@ -23,12 +24,14 @@ def update_jitter(num_servers: int) -> float:
     return jitter
 
 
-def send_sync_messages(interval: float, reference_time: float, num_servers: int):
+def send_sync_messages(interval: float, reference_time: float, num_servers: int, jitter: Optional[float]=None):
     sync_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
 
     while True:
         time.sleep(next_sync_time(interval, reference_time) - time.time())
-        jitter = update_jitter(num_servers)
+
+        if not jitter:
+            jitter = update_jitter(num_servers)
 
         payload = json.dumps({"reference_time": reference_time, "jitter": jitter}).encode('utf-8')
         for address in registration.get_registered_devices().values():
