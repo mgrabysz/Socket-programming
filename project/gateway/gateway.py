@@ -18,6 +18,9 @@ DEFAULT_PUBLIC_KEY_PATH = "../server/pubkey.pem"
 DEFAULT_KEY_PASSWORD = "Qwerty123"
 JITTER = 0.1
 
+import logging
+logging.basicConfig(filename='./gateway.log', level=logging.DEBUG, format='%(asctime)s %(levelname)s %(name)s %(message)s')
+
 
 class Gateway:
     def __init__(self, port: int, servers, interval: float, sync_interval: float, jitter:float, private_key, public_key, key_password,
@@ -32,6 +35,7 @@ class Gateway:
         self.key_password = key_password
         self.is_verbose = is_verbose
         self.reference_time = time.time()
+        self.loger = logging.getLogger(__name__)
 
     def start(self):
         listen_port = ('', self.port)
@@ -60,7 +64,9 @@ class Gateway:
             print(f'Received message: {message_json}')
 
             if 'action' not in message_json:
-                print('No action field in message')
+                msg = 'No action field in message'
+                print(msg)
+                self.loger.error(msg)
                 return
 
             action = message_json['action']
@@ -69,7 +75,9 @@ class Gateway:
             elif action == 'transmit':
                 transmission.handle_message(message_json)
             else:
-                print(f'Invalid action {action}')
+                msg = f'Invalid action {action}'
+                print(msg)
+                self.loger.error(msg)
 
 
 def create_parser():
