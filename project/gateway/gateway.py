@@ -4,7 +4,7 @@ import socket
 from threading import Thread
 
 
-from registration import *
+import registration
 import transmission
 import authentication
 
