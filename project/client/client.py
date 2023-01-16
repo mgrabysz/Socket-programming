@@ -5,7 +5,7 @@ import socket
 import time
 from threading import Lock, Thread
 
-from messages import RegisterMessage, TransmissionMessage, UnregisterMessage
+from messages import RegisterMessage, TransmissionMessage, UnregisterMessage, SyncMessage
 
 # defaults
 SERVER_IP = '127.0.0.1'
@@ -43,8 +43,9 @@ class Client:
         while True:
             message_bytes = self.socket.recv(BUF_SIZE)
             message_json = json.loads(message_bytes)
-            self.reference_time = message_json["reference_time"]
-            self.jitter = message_json["jitter"]
+            message = SyncMessage.from_json(message_json)
+            self.reference_time = message.reference_time
+            self.jitter = message.jitter
             print(f"Received sync message, reference {self.reference_time}, jitter {self.jitter}")
 
     def transmit(self, num_of_messages):

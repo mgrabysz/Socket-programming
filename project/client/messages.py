@@ -1,4 +1,5 @@
 import json
+from typing import NamedTuple
 
 
 class RegisterMessage:
@@ -29,6 +30,15 @@ class TransmissionMessage:
 
     def to_json(self):
         return json.dumps(self.__dict__)
+
+
+class SyncMessage(NamedTuple):
+    reference_time: float
+    jitter: float
+
+    @classmethod
+    def from_json(cls, json_message):
+        return cls(json_message['reference_time'], json_message['jitter'])
 
 
 if __name__ == "__main__":
