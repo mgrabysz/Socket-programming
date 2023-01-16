@@ -29,3 +29,7 @@ class TransmissionMessage:
 
     def to_json(self):
         return json.dumps(self.__dict__)
+
+
+if __name__ == "__main__":
+    pass
