@@ -45,3 +45,8 @@ docker compose up [-d]
 ```bash
 docker compose logs --follow [nazwy kontenerów]
 ```
+
+### Zatrzymanie wszystkich kontenerów
+```bash
+docker compose down
+```
