@@ -1,0 +1,15 @@
+services:
+  server1:
+    build: server
+    tty: true
+    command: -p 8082
+  gateway:
+    build: gateway
+    tty: true
+    command: -p 8000 -i 10 --sync_interval 15 -s server1:8082 --private_key privkey_2.pem
+  client1:
+    build: client
+    tty: true
+    depends_on:
+      - gateway
+    command: -a gateway -p 8000 -d 1 -m 60 -i 3 --id 1
