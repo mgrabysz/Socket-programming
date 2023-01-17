@@ -1,7 +1,7 @@
 services:
   gateway:
     build: gateway
-    tty: true
+    tty: false
     command: -p 8000 -i 10 --sync_interval 15 --jitter 0.0001
   client1: &client
     build: client
