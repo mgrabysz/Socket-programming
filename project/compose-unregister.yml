@@ -1,0 +1,11 @@
+services:
+  gateway:
+    build: gateway
+    tty: true
+    command: -p 8000 -i 5 --sync_interval 15
+  client1:
+    build: client
+    tty: true
+    depends_on:
+      - gateway
+    command: -a gateway -p 8000 -d 1 -m 3 -i 5 --id 1

@@ -1,0 +1,17 @@
+services:
+  gateway:
+    build: gateway
+    tty: true
+    command: -p 8000 -i 10 --sync_interval 15 --jitter 0.0001
+  client1: &client
+    build: client
+    tty: true
+    depends_on:
+      - gateway
+    command: -a gateway -p 8000 -d 1 -m 60 -i 3 --id 1 --random_start
+  client2:
+    <<: *client
+    command: -a gateway -p 8000 -d 1 -m 60 -i 3 --id 2 --random_start
+  client3:
+    <<: *client
+    command: -a gateway -p 8000 -d 1 -m 60 -i 3 --id 3 --random_start
