@@ -50,3 +50,27 @@ docker compose logs --follow [nazwy kontenerów]
 ```bash
 docker compose down
 ```
+
+## Uwagi dla przyszłych ściągających z tego repozytorium
+
+
+### Przejrzyj dokumentację końcową
+Nie wszystko w niniejszym readme jest całkowicie aktualne. Po dokładną listę argumentów wywołania klientów, bramy i serwerów, zajrzyj do pliku `Dokumentacja końcowa`. To plik, który został wysłany prowadzącemu projekt.
+
+### Uruchom scenariusze testowe
+Zrezygnowaliśmy z jednego `docker-compose` na rzecz różnych wariantów, które lepiej pokazują konkretne funkcjonalności:
+- `compose-unregister` - jeden klient rejestruje się, wysyła 3 wiadomości i wyrejestrowuje
+- `compose-basic` - ogólna konfiguracja z trzema klientami
+- `compose-fastclients` - klienci wysyłają wiadomości dużo szybciej niż brama 
+- `compose-slowclients` - klienci wysyłają wiadomości dużo wolniej niż brama
+- `compose-synctime` - klienci początkowo są rozregulowani, ale naprawiają się po otrzymaniu wiadomości synchronizującej od bramy
+- `compsoe-auth` - brama podpisuje paczki do serwera innym kluczem prywatnym, serwer wykrywa nieprawidłowość
+
+Żeby uruchomić taki zestaw kontenerów, uruchom polecenia analogiczne do tych w poprzednim punkcie, podając ścieżkę do odpowiedniego pliku konfiguracyjnego:
+```bash
+docker compose -f compose-basic.yml up
+```
+
+Pozdrawiam cieplutko
+
+
